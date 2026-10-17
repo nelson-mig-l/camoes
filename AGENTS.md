@@ -1,12 +1,21 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI agents when working with code in this repository.
 
 ## What this is
 
 An experimental generator of *ottava rima* stanzas (rhyme scheme ABABABCC) in the style of Camões' *Os Lusíadas*. It
 uses a word-level Markov model that is trained and sampled **backwards**: generation starts from a rhyming final word
-and walks toward the start of the verse. Plain Python, no third-party dependencies.
+and walks toward the start of the verse.
+
+## Dependencies
+
+```sh
+pip install -r requirements.txt
+```
+
+- **pyphen==0.18.1** — hyphenation library backed by Hunspell/LibreOffice dictionaries. Used to count syllables per
+  word at training time via `markov_utils.count_syllables()`. The `pt_PT` dictionary is loaded once at module import.
 
 ## Commands
 
@@ -38,6 +47,13 @@ Pipeline: `markov_data` (load + clean) → `markov_train` (count) → `markov_mo
 - **`PoetryModel`** holds `transitions`, `finals_by_rhyme` and `vocabulary`. `starts_by_final` is a derived index built
   in `__post_init__` and is **not** serialized. Add any new derived index the same way, so that both `train_model` and
   `load_model` get it. In JSON, the transition key pairs are joined with a space.
+- **`vocabulary` schema:** `dict[str, dict]` mapping each word to `{"count": int, "syllables": int}`. `count` is the
+  corpus frequency; `syllables` is computed at training time via `count_syllables()` (pyphen). If you change the
+  vocabulary schema, **retrain the model** — the old `model.json` will not be compatible.
+- **Syllable enforcement:** `generate_stanza` accepts a `target_syllables` parameter (default `10`). Each candidate
+  verse is scored with `count_metric_syllables()`, which sums per-word syllable counts from the vocabulary, subtracts
+  one for each synaloepha (vowel-ending word followed by vowel-starting word), and applies a final-word stress
+  adjustment (+1 oxytone, −1 proparoxytone). Pass `target_syllables=None` to disable the filter.
 - **Stanza generation** (`generate_stanza`) checks its inputs first (unknown rhyme → `ValueError` with close-match
   hints). It retries each verse `tries_per_verse` times and the whole octave `tries_per_stanza` times, then re-checks
   the full scheme. It returns `None` on failure. Pass `seed` for reproducible output.
@@ -50,7 +66,8 @@ Pipeline: `markov_data` (load + clean) → `markov_train` (count) → `markov_mo
 - Source files use CRLF line endings (`core.autocrlf=true`); keep them when editing.
 - Identifiers and docstrings are in English, but some local variables and comments in `markov_train.py` are in
   Portuguese (`transicoes`, `finais_por_rima`). The corpus and rhyme strings are Portuguese.
-- Known limitations (documented in `markov_main.py`): rhymes are approximate, meter/syllable count isn't implemented (
-  only word count is limited), and output quality depends on the corpus. `docs/REVIEW.md` lists open improvement ideas.
+- Known limitations (documented in `markov_main.py`): rhymes are approximate, syllable counting uses pyphen (accurate
+  for modern Portuguese; archaic forms may be miscounted), and synaloepha/stress adjustments are heuristic.
+  `docs/REVIEW.md` lists open improvement ideas.
 - The final word is currently chosen uniformly (`finals_weights` is computed but unused, and the weighted line is
   commented out). Whether to weight it is undecided, so ask before changing it.

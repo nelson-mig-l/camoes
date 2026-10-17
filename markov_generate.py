@@ -4,7 +4,7 @@ import re
 from collections import Counter
 
 from markov_model import PoetryModel
-from markov_utils import approximate_rhyme_key
+from markov_utils import approximate_rhyme_key, count_metric_syllables
 
 
 RHYME_SCHEME = "ABABABCC"
@@ -25,9 +25,14 @@ def generate_inverse_stanza(
     max_words: int = 10,
     rng: random.Random | None = None,
     max_steps_without_transition: int = 0,
+    target_syllables: int | None = None,
 ) -> str | None:
     """
     Generates a verse by starting from the final word and working backward through the model.
+
+    If *target_syllables* is given, the candidate verse is only accepted when its
+    metric syllable count matches exactly; otherwise None is returned so the caller
+    can retry.
 
     Returns None if it cannot find an ending or an initial transition
     compatible with the model.
@@ -49,7 +54,10 @@ def generate_inverse_stanza(
     pairs = model.starts_by_final.get(final)
     if not pairs:
         # The ending exists in the corpus, but it lacks sufficient context in the model.
-        return final.capitalize()
+        candidate = final.capitalize()
+        if target_syllables is not None:
+            return None
+        return candidate
 
     # Select an initial pair that has been observed.
     pair = rng.choice(pairs)
@@ -65,8 +73,14 @@ def generate_inverse_stanza(
             break
         verse_inverse.append(next_word)
 
-    verse = list(reversed(verse_inverse))
-    return " ".join(verse).capitalize()
+    verse_words = list(reversed(verse_inverse))
+
+    if target_syllables is not None:
+        syl_map = {w: model.vocabulary[w]["syllables"] for w in verse_words if w in model.vocabulary}
+        if count_metric_syllables(verse_words, syl_map) != target_syllables:
+            return None
+
+    return " ".join(verse_words).capitalize()
 
 
 def ends_with_rhyme(verse: str, expected_key: str) -> bool:
@@ -98,12 +112,15 @@ def generate_stanza(
     tries_per_verse: int = 30,
     tries_per_stanza: int = 20,
     seed: int | None = None,
+    target_syllables: int | None = 10,
 ) -> list[str] | None:
     """
     Generates a stanza (octave) following the rhyme scheme ABABABCC.
 
     Classes A, B, and C are approximated via an orthographic rhyme key.
     The function only accepts a line if it ends with the requested rhyme class.
+    If *target_syllables* is set (default 10), each verse must also match that
+    metric syllable count exactly.  Pass None to disable syllable enforcement.
     If it fails to construct the octave within the given constraints, it returns None.
     Raises ValueError for unknown rhyme classes or out-of-range parameters.
     """
@@ -139,6 +156,7 @@ def generate_stanza(
                     rhyme=rhyme,
                     max_words=max_words,
                     rng=rng,
+                    target_syllables=target_syllables,
                 )
                 if candidate and ends_with_rhyme(candidate, key):
                     accepted_verse = candidate

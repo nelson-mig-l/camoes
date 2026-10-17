@@ -8,7 +8,8 @@ from pathlib import Path
 class PoetryModel:
     transitions: dict[tuple[str, str], Counter[str]]
     finals_by_rhyme: dict[str, Counter[str]]
-    vocabulary: set[str]
+    # word -> {"count": int, "syllables": int}
+    vocabulary: dict[str, dict]
     # Index derived from transitions: final word -> observed pairs starting with it.
     # Built once so generation does not scan every transition for each candidate verse.
     starts_by_final: dict[str, list[tuple[str, str]]] = field(init=False, repr=False)
@@ -32,7 +33,8 @@ def save_model(model: PoetryModel, filename: str | Path) -> None:
             key: dict(counter)
             for key, counter in model.finals_by_rhyme.items()
         },
-        "vocabulary": sorted(model.vocabulary)
+        # vocabulary: {word: {"count": int, "syllables": int}}
+        "vocabulary": model.vocabulary,
     }
 
     with Path(filename).open("w", encoding="utf-8") as f:
@@ -52,5 +54,5 @@ def load_model(filename: str | Path) -> PoetryModel:
             key: Counter(counter)
             for key, counter in data["finals_by_rhyme"].items()
         },
-        vocabulary=set(data["vocabulary"])
+        vocabulary=data["vocabulary"],
     )

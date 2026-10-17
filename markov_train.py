@@ -1,7 +1,7 @@
 from collections import Counter, defaultdict
 
 from markov_model import PoetryModel
-from markov_utils import approximate_rhyme_key
+from markov_utils import approximate_rhyme_key, count_syllables
 
 
 def train_model(verses: list[list[str]]) -> PoetryModel:
@@ -14,10 +14,13 @@ def train_model(verses: list[list[str]]) -> PoetryModel:
 
     The counts allow for the selection of transitions in proportion to
     their observed frequency in the corpus.
+
+    vocabulary stores {count, syllables} per word, where count is the
+    corpus frequency and syllables is the pyphen-computed syllable count.
     """
     transitions: dict[tuple[str, str], Counter[str]] = defaultdict(Counter)
     ends_by_rhyme: dict[str, Counter[str]] = defaultdict(Counter)
-    vocabulary: set[str] = set()
+    word_freq: Counter[str] = Counter()
 
     valid_verses: list[list[str]] = []
 
@@ -27,7 +30,7 @@ def train_model(verses: list[list[str]]) -> PoetryModel:
             continue
 
         valid_verses.append(words)
-        vocabulary.update(words)
+        word_freq.update(words)
 
         final = words[-1]
         key = approximate_rhyme_key(final)
@@ -41,9 +44,14 @@ def train_model(verses: list[list[str]]) -> PoetryModel:
             ancestor = words[i - 2]
             transitions[(actual, previous)][ancestor] += 1
 
+    # Build vocabulary: {word: {"count": freq, "syllables": n}}
+    vocabulary: dict[str, dict] = {
+        word: {"count": freq, "syllables": count_syllables(word)}
+        for word, freq in word_freq.items()
+    }
+
     return PoetryModel(
         transitions=dict(transitions),
         finals_by_rhyme=dict(ends_by_rhyme),
         vocabulary=vocabulary,
     )
-

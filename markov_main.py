@@ -17,6 +17,7 @@ Limitations:
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 from pathlib import Path
 from typing import Iterable
@@ -25,7 +26,7 @@ from markov_data import load_corpus
 from markov_generate import generate_stanza, RHYME_SCHEME
 from markov_model import PoetryModel, save_model, load_model
 from markov_train import train_model
-from markov_utils import approximate_rhyme_key
+from markov_utils import approximate_rhyme_key, count_metric_syllables
 
 # Paths are anchored to this file so the script works from any working directory.
 BASE_DIR = Path(__file__).resolve().parent
@@ -43,10 +44,15 @@ def get_final_rhyme(model: PoetryModel, rhyme: str) -> list[str]:
     return list(finals.keys())
 
 
-def print_stanza(verses: Iterable[str]) -> None:
+def print_stanza(verses: Iterable[str], model: PoetryModel | None = None) -> None:
     for i, verse in enumerate(verses, start=1):
-        #print(f"{i:>2}. {verse}")
-        print(verse)
+        if model is not None:
+            words = re.findall(r"[a-záéíóúâêôàãõç]+(?:['-][a-záéíóúâêôàãõç]+)*", verse.lower())
+            syl_map = {w: model.vocabulary[w]["syllables"] for w in words if w in model.vocabulary}
+            n = count_metric_syllables(words, syl_map)
+            print(f"{verse}  [{n}]")
+        else:
+            print(verse)
 
 
 def show_available_rhymes(model: PoetryModel, limit: int | None = None) -> None:
@@ -84,7 +90,7 @@ if __name__ == "__main__":
 
         # print(f"Loaded verses: {len(model.training_verses)}")
         print(f"Unique words: {len(model.vocabulary)}")
-        show_available_rhymes(model)
+        # show_available_rhymes(model)
 
         # Choose three rhyme classes that exist in the corpus.
         # Replace these endings with classes confirmed in the list above.
@@ -95,14 +101,15 @@ if __name__ == "__main__":
             rhyme_c="aram",
             max_words=10,
             tries_per_verse=30,
-            tries_per_stanza=20
+            tries_per_stanza=20,
+            target_syllables=10,
         )
 
         print()
         if stanza:
             print(f"Generated stanza ({RHYME_SCHEME}):")
             print()
-            print_stanza(stanza)
+            print_stanza(stanza, model)
             print()
         else:
             print("It was not possible to generate a stanza for the given rhymes.")
