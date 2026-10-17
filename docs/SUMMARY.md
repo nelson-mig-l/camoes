@@ -1,0 +1,21 @@
+* Canto I: Partida e intriga
+* Canto II: Ciladas e salvamento
+* Canto III: História de Portugal
+* Canto IV: Profecia e despedida
+* Canto V: Monstros e navegação
+* Canto VI: Tempestade e chegada
+* Canto VII: Índia e críticas
+* Canto VIII: Traição e negociações
+* Canto IX: Ilha dos Amores
+* Canto X: Glória e regresso
+
+* Canto I: Departure and Intrigue
+* Canto II: Traps and Rescue
+* Canto III: History of Portugal
+* Canto IV: Prophecy and Farewell
+* Canto V: Monsters and Navigation
+* Canto VI: Storm and Arrival
+* Canto VII: India and Criticisms
+* Canto VIII: Treachery and Negotiations
+* Canto IX: Island of Love
+* Canto X: Glory and Return
