@@ -54,6 +54,37 @@ def load_corpus(path: str | Path) -> list[list[str]]:
     return verses
 
 
+def load_corpus_dir(directory: str | Path) -> list[list[str]]:
+    """
+    Loads and concatenates every *.txt file found in *directory*.
+
+    Files are processed in alphabetical order for reproducibility.
+    Raises FileNotFoundError if the directory does not exist, and
+    ValueError if no usable lines are found across all files.
+    """
+    directory = Path(directory)
+    if not directory.is_dir():
+        raise FileNotFoundError(
+            f"Corpus directory not found: {directory.resolve()}"
+        )
+
+    paths = sorted(directory.glob("*.txt"))
+    if not paths:
+        raise FileNotFoundError(
+            f"No .txt files found in: {directory.resolve()}"
+        )
+
+    verses: list[list[str]] = []
+    for path in paths:
+        verses.extend(load_corpus(path))
+
+    if not verses:
+        raise ValueError(
+            "No usable lines found across all corpus files. Check the files and their encoding."
+        )
+    return verses
+
+
 def load_text_corpus(text: str) -> list[list[str]]:
     """Useful version for small tests without a file."""
     verses: list[list[str]] = []

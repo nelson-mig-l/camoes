@@ -22,7 +22,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Iterable
 
-from markov_data import load_corpus
+from markov_data import load_corpus_dir
 from markov_generate import generate_stanza, RHYME_SCHEME
 from markov_model import PoetryModel, save_model, load_model
 from markov_train import train_model
@@ -30,7 +30,7 @@ from markov_utils import approximate_rhyme_key, count_metric_syllables
 
 # Paths are anchored to this file so the script works from any working directory.
 BASE_DIR = Path(__file__).resolve().parent
-CORPUS_PATH = BASE_DIR / "data" / "corpus.txt"
+DATA_DIR = BASE_DIR / "data"
 MODEL_PATH = BASE_DIR / "model.json"
 
 
@@ -83,7 +83,7 @@ Important limitations
 
 if __name__ == "__main__":
     try:
-        corpus = load_corpus(CORPUS_PATH)
+        corpus = load_corpus_dir(DATA_DIR)
         model = train_model(corpus)
         save_model(model, MODEL_PATH)
         model = load_model(MODEL_PATH)
@@ -109,7 +109,8 @@ if __name__ == "__main__":
         if stanza:
             print(f"Generated stanza ({RHYME_SCHEME}):")
             print()
-            print_stanza(stanza, model)
+            # print_stanza(stanza, model)
+            print_stanza(stanza)
             print()
         else:
             print("It was not possible to generate a stanza for the given rhymes.")
