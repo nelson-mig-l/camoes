@@ -99,10 +99,9 @@ if __name__ == "__main__":
             rhyme_a="ados",
             rhyme_b="al",
             rhyme_c="aram",
-            max_words=10,
+            target_syllables=10,
             tries_per_verse=30,
             tries_per_stanza=20,
-            target_syllables=10,
         )
 
         print()

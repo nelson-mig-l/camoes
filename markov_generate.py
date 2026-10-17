@@ -22,17 +22,14 @@ def weighted_choice(counters: Counter[str], rng: random.Random) -> str | None:
 def generate_inverse_stanza(
     model: PoetryModel,
     rhyme: str,
-    max_words: int = 10,
+    target_syllables: int,
     rng: random.Random | None = None,
-    max_steps_without_transition: int = 0,
-    target_syllables: int | None = None,
 ) -> str | None:
     """
     Generates a verse by starting from the final word and working backward through the model.
 
-    If *target_syllables* is given, the candidate verse is only accepted when its
-    metric syllable count matches exactly; otherwise None is returned so the caller
-    can retry.
+    The candidate verse is only accepted when its metric syllable count matches
+    *target_syllables* exactly; otherwise None is returned so the caller can retry.
 
     Returns None if it cannot find an ending or an initial transition
     compatible with the model.
@@ -54,16 +51,13 @@ def generate_inverse_stanza(
     pairs = model.starts_by_final.get(final)
     if not pairs:
         # The ending exists in the corpus, but it lacks sufficient context in the model.
-        candidate = final.capitalize()
-        if target_syllables is not None:
-            return None
-        return candidate
+        return None
 
     # Select an initial pair that has been observed.
     pair = rng.choice(pairs)
     verse_inverse = [pair[0], pair[1]]
 
-    while len(verse_inverse) < max_words:
+    while True:
         key = (verse_inverse[-2], verse_inverse[-1])
         options = model.transitions.get(key)
         if not options:
@@ -75,10 +69,9 @@ def generate_inverse_stanza(
 
     verse_words = list(reversed(verse_inverse))
 
-    if target_syllables is not None:
-        syl_map = {w: model.vocabulary[w]["syllables"] for w in verse_words if w in model.vocabulary}
-        if count_metric_syllables(verse_words, syl_map) != target_syllables:
-            return None
+    syl_map = {w: model.vocabulary[w]["syllables"] for w in verse_words if w in model.vocabulary}
+    if count_metric_syllables(verse_words, syl_map) != target_syllables:
+        return None
 
     return " ".join(verse_words).capitalize()
 
@@ -108,24 +101,20 @@ def generate_stanza(
     rhyme_a: str,
     rhyme_b: str,
     rhyme_c: str,
-    max_words: int = 10,
+    target_syllables: int,
     tries_per_verse: int = 30,
     tries_per_stanza: int = 20,
     seed: int | None = None,
-    target_syllables: int | None = 10,
 ) -> list[str] | None:
     """
     Generates a stanza (octave) following the rhyme scheme ABABABCC.
 
     Classes A, B, and C are approximated via an orthographic rhyme key.
-    The function only accepts a line if it ends with the requested rhyme class.
-    If *target_syllables* is set (default 10), each verse must also match that
-    metric syllable count exactly.  Pass None to disable syllable enforcement.
+    The function only accepts a line if it ends with the requested rhyme class
+    and its metric syllable count matches *target_syllables* exactly.
     If it fails to construct the octave within the given constraints, it returns None.
     Raises ValueError for unknown rhyme classes or out-of-range parameters.
     """
-    if max_words < 2:
-        raise ValueError(f"max_words must be at least 2, got {max_words}.")
     if tries_per_verse < 1 or tries_per_stanza < 1:
         raise ValueError(
             f"tries_per_verse and tries_per_stanza must be at least 1, "
@@ -154,9 +143,8 @@ def generate_stanza(
                 candidate = generate_inverse_stanza(
                     modelo,
                     rhyme=rhyme,
-                    max_words=max_words,
-                    rng=rng,
                     target_syllables=target_syllables,
+                    rng=rng,
                 )
                 if candidate and ends_with_rhyme(candidate, key):
                     accepted_verse = candidate

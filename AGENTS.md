@@ -61,6 +61,63 @@ Pipeline: `markov_data` (load + clean) → `markov_train` (count) → `markov_mo
   `'`/`-` are kept, and lines with fewer than 2 words are dropped. The word regex `[a-záéíóúâêôàãõç]+(?:['-][...]+)*` is
   repeated in `markov_data.py` and `markov_generate.py`; keep the two in sync.
 
+## Web interface
+
+A Vite (vanilla JS) page lives in `web/`. It loads `model.json` at runtime via `fetch` and reimplements the full
+generation pipeline in `web/src/markov.js`.
+
+```sh
+cd web
+npm install
+npm run dev       # dev server
+npm run build     # production build → web/dist/
+```
+
+`web/public/model.json` is a copy of the root `model.json`. After retraining, copy the file:
+
+```sh
+cp model.json web/public/model.json
+```
+
+`web/vite.config.js` sets `base: "/camoes/"` (via the `VITE_BASE` env var, defaulting to `/camoes/`) so that all
+asset URLs are correct when served from GitHub Pages. If the repository is ever renamed or served from a custom domain
+at the root, set `VITE_BASE=/` in the workflow env or update the default in `vite.config.js`.
+
+The GitHub Actions workflow (`.github/workflows/deploy-pages.yml`) builds `web/` and deploys `web/dist/` to GitHub
+Pages on every push to `main` that touches `web/**` or the workflow file itself. The page is served at
+`https://nelson-mig-l.github.io/camoes/`. GitHub Pages source must be set to **"GitHub Actions"** in repo Settings →
+Pages before the first deploy.
+
+### Python ↔ JavaScript sync contract
+
+`web/src/markov.js` is a manual port of three Python modules. The table below lists every piece that must be kept in
+sync. When you change the Python side, apply the matching change to the JS side and vice versa.
+
+| Concern | Python | JavaScript |
+|---|---|---|
+| **model.json schema** | `markov_model.py` `save_model` / `load_model` | `loadModel()` in `markov.js` |
+| **Transition key format** | `" ".join(pair)` (space-joined word pair) | `key.indexOf(" ")` split in `loadModel` and generation loop |
+| **`starts_by_final` index** | `PoetryModel.__post_init__` — maps `pair[0]` → list of pairs | same logic in `loadModel`: iterates transition keys, groups by first token |
+| **`vocabulary` schema** | `{"count": int, "syllables": int}` per word | `model.vocabulary[w].syllables` — must match key names exactly |
+| **Rhyme key heuristic** | `markov_utils.approximate_rhyme_key` | `approximateRhymeKey()` in `markov.js` |
+| **Metric syllable counting** | `markov_utils.count_metric_syllables` + `_final_stress_adjustment` | `countMetricSyllables()` + `finalStressAdjustment()` in `markov.js` |
+| **Synaloepha rule** | last char of word *i* in `VOWELS` and first char of word *i+1* in `VOWELS` → subtract 1 | same check using `VOWELS_SET` |
+| **Oxytone / proparoxytone lists** | `paroxytone_endings` tuple in `_final_stress_adjustment` | `paroxytoneEndings` array in `finalStressAdjustment()` — must be identical |
+| **Word regex** | `[a-záéíóúâêôàãõç]+(?:['-][...]+)*` in `markov_data.py` and `markov_generate.py` | `WORD_RE` in `markov.js` — same character class |
+| **Final-word selection** | uniform (`rng.choices(finals_candidates)`, weighted line commented out) | uniform (`rng.choice(finalCandidates)`) — do not change one without changing the other |
+| **Generation loop** | `generate_inverse_stanza` + `generate_stanza` in `markov_generate.py` | `generateInverseStanza()` + `generateStanza()` in `markov.js` |
+| **RHYME_SCHEME** | `"ABABABCC"` constant in `markov_generate.py` | `RHYME_SCHEME` export in `markov.js` |
+
+**Syllable counting divergence (intentional).** The Python fallback uses pyphen (Hunspell). The JS fallback uses vowel
+nucleus counting. This only affects out-of-vocabulary words; for all words present in `vocabulary` both sides read the
+same pre-computed integer, so results are identical for known corpus words.
+
+**If you change `model.json`'s schema** (e.g. add a field, rename a key, change the transition key separator):
+1. Update `save_model` / `load_model` in `markov_model.py`.
+2. Update `loadModel()` in `web/src/markov.js`.
+3. Retrain (`python markov_main.py`) to regenerate `model.json`.
+4. Copy the new file: `cp model.json web/public/model.json`.
+
 ## Conventions
 
 - Source files use CRLF line endings (`core.autocrlf=true`); keep them when editing.

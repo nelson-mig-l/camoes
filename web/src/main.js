@@ -66,8 +66,11 @@ form.addEventListener("submit", (e) => {
   }
 
   const targetSylStr = document.getElementById("target-syllables").value.trim();
-  const targetSyllables = targetSylStr === "" ? null : parseInt(targetSylStr, 10);
-  const maxWords     = parseInt(document.getElementById("max-words").value, 10);
+  const targetSyllables = parseInt(targetSylStr, 10);
+  if (!targetSylStr || isNaN(targetSyllables) || targetSyllables < 1) {
+    showError("O número de sílabas métricas é obrigatório e deve ser um inteiro positivo.");
+    return;
+  }
   const triesVerse   = parseInt(document.getElementById("tries-verse").value, 10);
   const triesStanza  = parseInt(document.getElementById("tries-stanza").value, 10);
   const seedStr      = document.getElementById("seed").value.trim();
@@ -80,18 +83,16 @@ form.addEventListener("submit", (e) => {
   requestAnimationFrame(() => {
     setTimeout(() => {
       try {
-        const result = generateStanza(model, rhymeA, rhymeB, rhymeC, {
-          maxWords,
+        const result = generateStanza(model, rhymeA, rhymeB, rhymeC, targetSyllables, {
           triesPerVerse: triesVerse,
           triesPerStanza: triesStanza,
           seed,
-          targetSyllables,
         });
 
         if (!result) {
           showError(
             "Não foi possível gerar uma oitava com estas rimas e parâmetros. " +
-            "Tente outras rimas, aumente as tentativas ou desative a restrição de sílabas."
+            "Tente outras rimas ou aumente o número de tentativas."
           );
         } else {
           renderStanza(result);

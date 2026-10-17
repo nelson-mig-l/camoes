@@ -338,13 +338,12 @@ export function endsWithRhyme(verse, expectedKey) {
  * Port of markov_generate.generate_inverse_stanza.
  *
  * @param {object} model
- * @param {string} rhyme         – target rhyme word / ending
- * @param {number} maxWords
- * @param {object} rng           – PRNG returned by makePRNG
- * @param {number|null} targetSyllables
+ * @param {string} rhyme            – target rhyme word / ending
+ * @param {number} targetSyllables  – required metric syllable count
+ * @param {object} rng              – PRNG returned by makePRNG
  * @returns {string|null}
  */
-export function generateInverseStanza(model, rhyme, maxWords, rng, targetSyllables) {
+export function generateInverseStanza(model, rhyme, targetSyllables, rng) {
   const rhymeKey = approximateRhymeKey(rhyme);
   const finals = model.finals_by_rhyme[rhymeKey];
   if (!finals) return null;
@@ -357,8 +356,7 @@ export function generateInverseStanza(model, rhyme, maxWords, rng, targetSyllabl
   const pairs = model.starts_by_final[finalWord];
   if (!pairs) {
     // Word exists but lacks context in the model.
-    if (targetSyllables !== null) return null;
-    return capitalise(finalWord);
+    return null;
   }
 
   const pair = rng.choice(pairs);           // pair is "w1 w2"
@@ -367,7 +365,7 @@ export function generateInverseStanza(model, rhyme, maxWords, rng, targetSyllabl
   const w1 = pair.slice(spaceIdx + 1);
   const verseInverse = [w0, w1];
 
-  while (verseInverse.length < maxWords) {
+  while (true) {
     const last2 = verseInverse[verseInverse.length - 2] + " " + verseInverse[verseInverse.length - 1];
     const options = model.transitions[last2];
     if (!options) break;
@@ -380,13 +378,11 @@ export function generateInverseStanza(model, rhyme, maxWords, rng, targetSyllabl
 
   const verseWords = [...verseInverse].reverse();
 
-  if (targetSyllables !== null) {
-    const sylMap = {};
-    for (const w of verseWords) {
-      if (model.vocabulary[w]) sylMap[w] = model.vocabulary[w].syllables;
-    }
-    if (countMetricSyllables(verseWords, sylMap) !== targetSyllables) return null;
+  const sylMap = {};
+  for (const w of verseWords) {
+    if (model.vocabulary[w]) sylMap[w] = model.vocabulary[w].syllables;
   }
+  if (countMetricSyllables(verseWords, sylMap) !== targetSyllables) return null;
 
   return capitalise(verseWords.join(" "));
 }
@@ -407,26 +403,20 @@ function capitalise(s) {
  * @param {string} rhymeA
  * @param {string} rhymeB
  * @param {string} rhymeC
+ * @param {number} targetSyllables  – required metric syllable count per verse
  * @param {object} opts
- * @param {number}      [opts.maxWords=10]
  * @param {number}      [opts.triesPerVerse=30]
  * @param {number}      [opts.triesPerStanza=20]
- * @param {number|null} [opts.seed=null]          null → random seed
- * @param {number|null} [opts.targetSyllables=10]
- * @returns {{ stanza: string[], syllables: number[] }|null}
- *   Returns an object with the stanza lines and their metric syllable counts,
- *   or null on failure.
+ * @param {number|null} [opts.seed=null]   null → random seed
+ * @returns {{ stanza: string[], syllables: number[], seed: number }|null}
  */
-export function generateStanza(model, rhymeA, rhymeB, rhymeC, opts = {}) {
+export function generateStanza(model, rhymeA, rhymeB, rhymeC, targetSyllables, opts = {}) {
   const {
-    maxWords = 10,
     triesPerVerse = 30,
     triesPerStanza = 20,
     seed = null,
-    targetSyllables = 10,
   } = opts;
 
-  if (maxWords < 2) throw new Error(`maxWords must be at least 2, got ${maxWords}.`);
   if (triesPerVerse < 1 || triesPerStanza < 1) {
     throw new Error(
       `triesPerVerse and triesPerStanza must be at least 1, got ${triesPerVerse} and ${triesPerStanza}.`
@@ -441,7 +431,7 @@ export function generateStanza(model, rhymeA, rhymeB, rhymeC, opts = {}) {
 
   const effectiveSeed = seed !== null ? seed : Math.floor(Math.random() * 0xffffffff);
   const rng = makePRNG(effectiveSeed);
-  const schema = [...RHYME_SCHEME]; // ['A','B','A','B','A','B','C','C']
+  const schema = [...RHYME_SCHEME];
 
   for (let stanzaTry = 0; stanzaTry < triesPerStanza; stanzaTry++) {
     const stanza = [];
@@ -453,9 +443,7 @@ export function generateStanza(model, rhymeA, rhymeB, rhymeC, opts = {}) {
       let accepted = null;
 
       for (let verseTry = 0; verseTry < triesPerVerse; verseTry++) {
-        const candidate = generateInverseStanza(
-          model, rhyme, maxWords, rng, targetSyllables
-        );
+        const candidate = generateInverseStanza(model, rhyme, targetSyllables, rng);
         if (candidate && endsWithRhyme(candidate, key)) {
           accepted = candidate;
           break;
@@ -469,7 +457,6 @@ export function generateStanza(model, rhymeA, rhymeB, rhymeC, opts = {}) {
     if (!failed && stanza.length === 8) {
       const valid = stanza.every((verse, i) => endsWithRhyme(verse, keys[schema[i]]));
       if (valid) {
-        // Compute metric syllable counts for display.
         const syllables = stanza.map((verse) => {
           const words = [...verse.toLowerCase().matchAll(WORD_RE)].map((m) => m[0]);
           const sylMap = {};
