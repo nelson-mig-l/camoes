@@ -36,7 +36,7 @@ async function init() {
   try {
     genBtn.textContent = "A carregar modelo…";
     genBtn.disabled = true;
-    model = await loadModel("/model.json");
+    model = await loadModel(`${import.meta.env.BASE_URL}model.json`);
     genBtn.textContent = "Gerar oitava";
     genBtn.disabled = false;
     populateRhymesList(model);
@@ -71,10 +71,11 @@ form.addEventListener("submit", (e) => {
     showError("O número de sílabas métricas é obrigatório e deve ser um inteiro positivo.");
     return;
   }
-  const triesVerse   = parseInt(document.getElementById("tries-verse").value, 10);
-  const triesStanza  = parseInt(document.getElementById("tries-stanza").value, 10);
-  const seedStr      = document.getElementById("seed").value.trim();
-  const seed         = seedStr === "" ? null : parseInt(seedStr, 10);
+
+  const triesVerse  = parseInt(document.getElementById("tries-verse").value, 10);
+  const triesStanza = parseInt(document.getElementById("tries-stanza").value, 10);
+  const seedStr     = document.getElementById("seed").value.trim();
+  const seed        = seedStr === "" ? null : parseInt(seedStr, 10);
 
   genBtn.disabled = true;
   genBtn.textContent = "A gerar…";
