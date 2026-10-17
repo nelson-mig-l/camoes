@@ -1,2 +1,2 @@
-kiro-cli login --user-device-flow
+kiro-cli login --use-device-flow
 kiro-cli

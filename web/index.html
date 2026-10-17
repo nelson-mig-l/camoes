@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerador de Oitavas — Camões</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Gerador de Oitavas</h1>
+        <p class="subtitle">
+          Gerador experimental de oitavas (<em>ABABABCC</em>) ao estilo de Camões,
+          usando um modelo de Markov treinado n'<em>Os Lusíadas</em>.
+        </p>
+      </header>
+
+      <main>
+        <!-- ── Parameters form ─────────────────────────────────────── -->
+        <section class="card" id="params-section">
+          <h2>Parâmetros</h2>
+          <form id="params-form" novalidate>
+
+            <fieldset>
+              <legend>Rimas (A, B, C)</legend>
+              <div class="field-row">
+                <label for="rhyme-a">Rima A</label>
+                <input id="rhyme-a" type="text" value="ados" autocomplete="off" spellcheck="false" />
+                <span class="field-hint">ex: <em>ados</em></span>
+              </div>
+              <div class="field-row">
+                <label for="rhyme-b">Rima B</label>
+                <input id="rhyme-b" type="text" value="al" autocomplete="off" spellcheck="false" />
+                <span class="field-hint">ex: <em>al</em></span>
+              </div>
+              <div class="field-row">
+                <label for="rhyme-c">Rima C</label>
+                <input id="rhyme-c" type="text" value="aram" autocomplete="off" spellcheck="false" />
+                <span class="field-hint">ex: <em>aram</em></span>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Sílabas e palavras</legend>
+              <div class="field-row">
+                <label for="target-syllables">Sílabas métricas alvo</label>
+                <input id="target-syllables" type="number" min="1" max="20" value="10" />
+                <span class="field-hint">ou vazio para desativar</span>
+              </div>
+              <div class="field-row">
+                <label for="max-words">Máximo de palavras por verso</label>
+                <input id="max-words" type="number" min="2" max="30" value="10" />
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Tentativas</legend>
+              <div class="field-row">
+                <label for="tries-verse">Tentativas por verso</label>
+                <input id="tries-verse" type="number" min="1" max="200" value="30" />
+              </div>
+              <div class="field-row">
+                <label for="tries-stanza">Tentativas por oitava</label>
+                <input id="tries-stanza" type="number" min="1" max="200" value="20" />
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Reprodutibilidade</legend>
+              <div class="field-row">
+                <label for="seed">Semente (seed)</label>
+                <input id="seed" type="number" min="0" value="" placeholder="aleatório" />
+                <span class="field-hint">deixe vazio para resultado aleatório</span>
+              </div>
+            </fieldset>
+
+            <div class="actions">
+              <button type="submit" id="generate-btn" disabled>A carregar modelo…</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ── Output ──────────────────────────────────────────────── -->
+        <section class="card" id="output-section" hidden>
+          <h2>Oitava gerada <span id="scheme-badge" class="scheme">ABABABCC</span></h2>
+          <div id="stanza-output" class="stanza"></div>
+          <p id="seed-display" class="seed-display"></p>
+        </section>
+
+        <!-- ── Error box ───────────────────────────────────────────── -->
+        <div id="error-box" class="error-box" hidden></div>
+
+        <!-- ── Rhyme classes browser ───────────────────────────────── -->
+        <section class="card" id="rhymes-section" hidden>
+          <h2>Classes de rima disponíveis</h2>
+          <p class="section-hint">
+            Clique numa classe para copiar a chave para o campo Rima A, B ou C.
+            A chave é a terminação ortográfica que define a classe.
+          </p>
+          <div class="rhyme-filter-row">
+            <input id="rhyme-filter" type="search" placeholder="Filtrar…" autocomplete="off" />
+            <span id="rhyme-count"></span>
+          </div>
+          <div id="rhymes-list" class="rhymes-list"></div>
+        </section>
+      </main>
+
+      <footer>
+        <p>
+          Modelo treinado em obras de Camões.
+          A contagem de sílabas usa a tabela pré-calculada do vocabulário;
+          para palavras fora do vocabulário recorre a uma heurística de núcleos vocálicos.
+        </p>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

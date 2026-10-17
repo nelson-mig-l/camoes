@@ -1,0 +1,393 @@
+/* ============================================================
+   Base & reset
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #fdf8f0;
+  --surface:     #fff9f0;
+  --border:      #d6c9a8;
+  --border-soft: #ebe0c8;
+  --text:        #2c2416;
+  --text-muted:  #7a6a50;
+  --accent:      #7b3a10;
+  --accent-dark: #5a2a08;
+  --accent-light:#f3e6d0;
+  --a-color:     #2a6496;
+  --b-color:     #276741;
+  --c-color:     #7b3a10;
+  --error-bg:    #fef2f2;
+  --error-text:  #991b1b;
+  --error-border:#fca5a5;
+  --radius:      8px;
+  --shadow:      0 2px 8px rgba(44,36,22,.10);
+  font-size: 16px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.65;
+  padding: 1.5rem 1rem 4rem;
+}
+
+/* ============================================================
+   Layout
+   ============================================================ */
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+header h1 {
+  font-size: 2rem;
+  letter-spacing: .02em;
+  color: var(--accent);
+  margin-bottom: .3rem;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: .95rem;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+footer {
+  margin-top: 3rem;
+  text-align: center;
+  font-size: .82rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-soft);
+  padding-top: 1rem;
+}
+
+/* ============================================================
+   Cards
+   ============================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.card h2 {
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+/* ============================================================
+   Form
+   ============================================================ */
+form fieldset {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: .9rem 1rem;
+  margin-bottom: 1rem;
+}
+
+form fieldset:last-of-type { margin-bottom: 0; }
+
+form legend {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 0 .4rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 180px 1fr auto;
+  align-items: center;
+  gap: .5rem 1rem;
+  margin-bottom: .55rem;
+}
+
+.field-row:last-child { margin-bottom: 0; }
+
+.field-row label {
+  font-size: .9rem;
+  color: var(--text);
+}
+
+.field-row input {
+  font-family: inherit;
+  font-size: .95rem;
+  padding: .38rem .6rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--text);
+  transition: border-color .15s;
+  width: 100%;
+}
+
+.field-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(123,58,16,.12);
+}
+
+.field-hint {
+  font-size: .8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Actions
+   ============================================================ */
+.actions {
+  margin-top: 1.2rem;
+  text-align: right;
+}
+
+#generate-btn {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: .6rem 1.8rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  letter-spacing: .03em;
+  transition: background .15s, opacity .15s;
+}
+
+#generate-btn:hover:not(:disabled) { background: var(--accent-dark); }
+#generate-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ============================================================
+   Rhyme target buttons (A / B / C selector)
+   ============================================================ */
+.target-btn-group {
+  display: inline-flex;
+  gap: .2rem;
+  margin-left: .8rem;
+}
+
+.rhyme-target-btn {
+  font-family: inherit;
+  font-size: .75rem;
+  font-weight: 700;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: #fff;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+  transition: all .12s;
+}
+
+.rhyme-target-btn.active[data-target="A"] {
+  background: var(--a-color); border-color: var(--a-color); color: #fff;
+}
+.rhyme-target-btn.active[data-target="B"] {
+  background: var(--b-color); border-color: var(--b-color); color: #fff;
+}
+.rhyme-target-btn.active[data-target="C"] {
+  background: var(--c-color); border-color: var(--c-color); color: #fff;
+}
+
+/* ============================================================
+   Stanza output
+   ============================================================ */
+.scheme {
+  font-size: .8rem;
+  font-family: monospace;
+  background: var(--accent-light);
+  color: var(--accent);
+  border-radius: 4px;
+  padding: .1rem .5rem;
+  letter-spacing: .12em;
+}
+
+.stanza {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  margin-bottom: .8rem;
+}
+
+.verse {
+  display: grid;
+  grid-template-columns: 1.8rem 1fr auto;
+  align-items: baseline;
+  gap: .5rem;
+  padding: .35rem .5rem;
+  border-radius: 5px;
+}
+
+.verse-a { background: rgba(42, 100, 150, .07); }
+.verse-b { background: rgba(39, 103, 65,  .07); }
+.verse-c { background: rgba(123, 58,  16, .07); }
+
+.rhyme-label {
+  font-weight: 700;
+  font-size: .8rem;
+  text-align: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  line-height: 1.4rem;
+  border-radius: 50%;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.verse-a .rhyme-label { background: var(--a-color); }
+.verse-b .rhyme-label { background: var(--b-color); }
+.verse-c .rhyme-label { background: var(--c-color); }
+
+.verse-text {
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.syl-count {
+  font-family: monospace;
+  font-size: .85rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  align-self: center;
+}
+
+.seed-display {
+  font-size: .78rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+/* ============================================================
+   Error box
+   ============================================================ */
+.error-box {
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
+  border-radius: var(--radius);
+  padding: .9rem 1.1rem;
+  font-size: .92rem;
+}
+
+/* ============================================================
+   Rhyme classes browser
+   ============================================================ */
+.section-hint {
+  font-size: .88rem;
+  color: var(--text-muted);
+  margin-bottom: .8rem;
+}
+
+.rhyme-filter-row {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin-bottom: .9rem;
+}
+
+#rhyme-filter {
+  font-family: inherit;
+  font-size: .9rem;
+  padding: .38rem .7rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--text);
+  flex: 1;
+  max-width: 260px;
+}
+
+#rhyme-filter:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(123,58,16,.12);
+}
+
+#rhyme-count {
+  font-size: .82rem;
+  color: var(--text-muted);
+}
+
+.rhymes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: .2rem;
+}
+
+.rhyme-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .1rem;
+  padding: .35rem .65rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+  text-align: left;
+  font-family: inherit;
+}
+
+.rhyme-chip:hover,
+.rhyme-chip:focus {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  outline: none;
+}
+
+.chip-key {
+  font-weight: 700;
+  font-size: .9rem;
+  color: var(--accent);
+}
+
+.chip-examples {
+  font-size: .75rem;
+  color: var(--text-muted);
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 600px) {
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: .25rem;
+  }
+  .field-hint { display: none; }
+  .verse {
+    grid-template-columns: 1.6rem 1fr auto;
+  }
+}
