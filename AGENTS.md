@@ -20,17 +20,17 @@ pip install -r requirements.txt
 ## Commands
 
 ```sh
-# Train on data/corpus.txt, write model.json, print rhyme classes and one stanza
-python markov_main.py
+# Train on data/, write model/model.json, print rhyme classes and one stanza
+python scripts/markov_main.py
 ```
 
 - Python 3.10+ is required (the code uses `X | None` syntax). The parent `.venv` has Python 3.14.
-- Imports are flat module names (`from markov_model import ...`), so the script must run with this folder on `sys.path`.
+- Imports are flat module names (`from markov_model import ...`), so the script must run with `scripts/` on `sys.path`.
   Running the file directly does that. Paths are anchored to `__file__`, so the working directory doesn't matter.
 - There are no tests, linter or build config. `markov_data.load_text_corpus(text)` builds a corpus from a string, which
   is handy for quick checks without the corpus file.
-- **Running `markov_main.py` overwrites the tracked `model.json` (~2.7 MB).** To experiment without touching it, copy
-  the `.py` files and `data/` to a scratch folder and run there.
+- **Running `markov_main.py` overwrites the tracked `model/model.json` (~2.7 MB).** To experiment without touching it, copy
+  the `scripts/` and `data/` to a scratch folder and run there.
 
 ## Architecture
 
@@ -73,10 +73,10 @@ npm run dev       # dev server
 npm run build     # production build → web/dist/
 ```
 
-`web/public/model.json` is a copy of the root `model.json`. After retraining, copy the file:
+`web/public/model.json` is a copy of `model/model.json`. After retraining, copy the file:
 
 ```sh
-cp model.json web/public/model.json
+cp model/model.json web/public/model.json
 ```
 
 `web/vite.config.js` sets `base: "/camoes/"` (via the `VITE_BASE` env var, defaulting to `/camoes/`) so that all
@@ -115,8 +115,8 @@ same pre-computed integer, so results are identical for known corpus words.
 **If you change `model.json`'s schema** (e.g. add a field, rename a key, change the transition key separator):
 1. Update `save_model` / `load_model` in `markov_model.py`.
 2. Update `loadModel()` in `web/src/markov.js`.
-3. Retrain (`python markov_main.py`) to regenerate `model.json`.
-4. Copy the new file: `cp model.json web/public/model.json`.
+3. Retrain (`python scripts/markov_main.py`) to regenerate `model/model.json`.
+4. Copy the new file: `cp model/model.json web/public/model.json`.
 
 ## Conventions
 

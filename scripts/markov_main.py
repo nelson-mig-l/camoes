@@ -29,9 +29,10 @@ from markov_train import train_model
 from markov_utils import approximate_rhyme_key, count_metric_syllables
 
 # Paths are anchored to this file so the script works from any working directory.
-BASE_DIR = Path(__file__).resolve().parent
+# scripts/ lives one level below the repo root.
+BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
-MODEL_PATH = BASE_DIR / "model.json"
+MODEL_PATH = BASE_DIR / "model" / "model.json"
 
 
 def get_final_rhyme(model: PoetryModel, rhyme: str) -> list[str]:
@@ -85,6 +86,7 @@ if __name__ == "__main__":
     try:
         corpus = load_corpus_dir(DATA_DIR)
         model = train_model(corpus)
+        MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
         save_model(model, MODEL_PATH)
         model = load_model(MODEL_PATH)
 
