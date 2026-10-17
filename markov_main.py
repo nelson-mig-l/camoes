@@ -103,6 +103,7 @@ if __name__ == "__main__":
             print(f"Generated stanza ({RHYME_SCHEME}):")
             print()
             print_stanza(stanza)
+            print()
         else:
             print("It was not possible to generate a stanza for the given rhymes.")
 
