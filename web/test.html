@@ -52,6 +52,21 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    .text h2 select {
+      background-color: #042e5c;
+      border: 2px solid #c8d8f0;
+      color: #c8d8f0;
+      font-family: inherit;
+      font-size: 0.9em;
+      padding: 0.1em 0.3em;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0 0.15em;
+      max-width: 7em;
+    }
+    .text h2 select:focus {
+      outline: 2px solid #ffffff;
+    }
     .text h2 button:hover {
       background-color: #c8d8f0;
       color: #042e5c;
@@ -66,7 +81,13 @@
   <div class="content">
     <img src="./camoes.png" alt="Camões">
     <div class="text">
-      <h2>Oh Camões, faz lá <button type="button" id="gen-btn">mais uma</button> rima!</h2>
+      <h2>Oh Camões! Faz lá <button type="button" id="gen-btn">mais uma</button> oitava com estas rimas:
+        <ul>
+        <li><select id="rhyme-a" aria-label="Rima A"><option value="">a carregar…</option></select></li>
+        <li><select id="rhyme-b" aria-label="Rima B"><option value="">a carregar…</option></select></li>
+        <li><select id="rhyme-c" aria-label="Rima C"><option value="">a carregar…</option></select></li>
+        </ul>
+      </h2>
       <p id="p1">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
