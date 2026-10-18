@@ -82,9 +82,9 @@ form.addEventListener("submit", (e) => {
 
   // Run generation asynchronously so the browser can paint the "A gerar…" state.
   requestAnimationFrame(() => {
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        const result = generateStanza(model, rhymeA, rhymeB, rhymeC, targetSyllables, {
+        const result = await generateStanza(model, rhymeA, rhymeB, rhymeC, targetSyllables, {
           triesPerVerse: triesVerse,
           triesPerStanza: triesStanza,
           seed,

@@ -374,6 +374,7 @@ export function generateInverseStanza(model, rhyme, targetSyllables, rng) {
     const nextWord = rng.weightedChoice(items, weights);
     if (!nextWord) break;
     verseInverse.push(nextWord);
+    if (verseInverse.length > 35) break;
   }
 
   const verseWords = [...verseInverse].reverse();
@@ -408,9 +409,9 @@ function capitalise(s) {
  * @param {number}      [opts.triesPerVerse=30]
  * @param {number}      [opts.triesPerStanza=20]
  * @param {number|null} [opts.seed=null]   null → random seed
- * @returns {{ stanza: string[], syllables: number[], seed: number }|null}
+ * @returns {Promise<{ stanza: string[], syllables: number[], seed: number }|null>}
  */
-export function generateStanza(model, rhymeA, rhymeB, rhymeC, targetSyllables, opts = {}) {
+export async function generateStanza(model, rhymeA, rhymeB, rhymeC, targetSyllables, opts = {}) {
   const {
     triesPerVerse = 30,
     triesPerStanza = 20,
@@ -433,7 +434,12 @@ export function generateStanza(model, rhymeA, rhymeB, rhymeC, targetSyllables, o
   const rng = makePRNG(effectiveSeed);
   const schema = [...RHYME_SCHEME];
 
+  // Yield to the event loop between stanza attempts so the browser stays responsive.
+  const yieldToEventLoop = () => new Promise((resolve) => setTimeout(resolve, 0));
+
   for (let stanzaTry = 0; stanzaTry < triesPerStanza; stanzaTry++) {
+    await yieldToEventLoop();
+
     const stanza = [];
     let failed = false;
 

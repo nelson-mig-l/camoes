@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camões</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #042e5c;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      color: #ffffff;
+      font-family: Georgia, serif;
+      font-size: 2rem;
+      text-align: center;
+      padding: 1.5rem;
+      letter-spacing: 0.08em;
+    }
+    .content {
+      display: flex;
+      align-items: flex-start;
+    }
+    img {
+      width: 50%;
+      display: block;
+      flex-shrink: 0;
+    }
+    .text {
+      color: #c8d8f0;
+      padding: 3rem;
+      font-family: Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+    .text h2 {
+      margin-top: 0;
+      color: #ffffff;
+      font-size: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+    .text h2 button {
+      background: none;
+      border: 2px solid #c8d8f0;
+      color: #c8d8f0;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: bold;
+      padding: 0.1em 0.5em;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .text h2 button:hover {
+      background-color: #c8d8f0;
+      color: #042e5c;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Chateia o Camões</h1>
+    <p>O Camões fica chateado quando já não tem palavras para rimar.</p>
+  </header>
+  <div class="content">
+    <img src="./camoes.png" alt="Camões">
+    <div class="text">
+      <h2>Oh Camões, faz lá <button type="button" id="gen-btn">mais uma</button> rima!</h2>
+      <p id="p1">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+        commodo consequat.
+      </p>
+      <p id="p2">
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+        dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+      </p>
+      <p id="p3">
+        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
+        doloremque laudantium, totam rem aperiam eaque ipsa quae ab illo inventore
+        veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+      </p>
+    </div>
+  </div>
+
+  <script type="module" src="./src/test.js"></script>
+</body>
+</html>

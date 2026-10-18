@@ -125,6 +125,12 @@ while True:
 
 No `max_words` guard. If the reverse-transition graph has a long cycle a single candidate can grow to hundreds of words before the syllable check rejects it, wasting time (and freezing the browser in JS).
 
+The loop breaks only when `model.transitions` has no entry for the last two words in `verse_inverse`. This happens at a **dead end** — a bigram that was never followed by a third word in the training corpus. If instead every bigram the walk visits has at least one outgoing transition, the walk never reaches a dead end and the loop never exits on its own.
+
+This condition arises when the reverse-transition graph contains a **cycle**: a sequence of bigrams `(A,B) → C`, `(B,C) → D`, …, `(Y,Z) → A` where following the weighted choices eventually loops back to a bigram already seen. Because `rng.weightedChoice` is not deterministic (it re-samples on every call), a strict cycle is unlikely in practice, but a **near-cycle** — a densely connected subgraph where every reachable bigram has successors — produces walks that grow without bound until a low-probability dead-end bigram is eventually hit, or never. The more frequent a word's bigram context, the more successors it tends to have and the deeper the walk can go before terminating.
+
+In the browser this is especially problematic: the JS `generateInverseStanza` runs synchronously on the main thread, so a very long walk freezes the tab until it finishes.
+
 **Fix:** Add `if len(verse_inverse) > 20: break` (or a configurable constant).
 
 ---

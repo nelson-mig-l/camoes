@@ -66,6 +66,8 @@ def generate_inverse_stanza(
         if next_word is None:
             break
         verse_inverse.append(next_word)
+        if len(verse_inverse) > 35:
+            break
 
     verse_words = list(reversed(verse_inverse))
 
