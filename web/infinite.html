@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camões Infinito</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background-color: #042e5c;
+      color: #c8d8f0;
+      font-family: Georgia, serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      text-align: center;
+      padding: 1.5rem 1rem 0.5rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: #ffffff;
+      letter-spacing: 0.08em;
+    }
+
+    #status {
+      text-align: center;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      color: #8aafd4;
+      min-height: 1.5em;
+    }
+
+    .columns {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      padding: 1rem 1.5rem 2rem;
+      align-items: start;
+    }
+
+    /* Column is a fixed-height container; layers stack inside it */
+    .column {
+      position: relative;
+      min-height: 18rem;
+      background-color: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(200, 216, 240, 0.15);
+      border-radius: 6px;
+    }
+
+    /* Both layers fill the column and stack on top of each other */
+    .layer {
+      position: absolute;
+      inset: 0;
+      padding: 1.2rem 1.2rem 1rem;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .layer.visible {
+      opacity: 1;
+    }
+
+    .verse {
+      font-size: 1rem;
+      line-height: 1.7;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .verse + .verse {
+      margin-top: 0.1rem;
+    }
+
+    /* Blank line before the closing couplet (verse index 6, i.e. 7th child) */
+    .verse:nth-child(7) {
+      margin-top: 0.8rem;
+    }
+
+    .syl {
+      font-size: 0.75rem;
+      color: #5a7fa8;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .rhyme-tag {
+      margin-top: 0.8rem;
+      font-size: 0.75rem;
+      color: #5a7fa8;
+      letter-spacing: 0.05em;
+    }
+
+    .stanza-error {
+      font-style: italic;
+      color: #8aafd4;
+    }
+
+    @media (max-width: 700px) {
+      .columns { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Camões Infinito</h1>
+  </header>
+  <p id="status"></p>
+
+  <div class="columns">
+    <div class="column" id="col-0">
+      <div class="layer"></div>
+      <div class="layer"></div>
+    </div>
+    <div class="column" id="col-1">
+      <div class="layer"></div>
+      <div class="layer"></div>
+    </div>
+    <div class="column" id="col-2">
+      <div class="layer"></div>
+      <div class="layer"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/infinite.js"></script>
+</body>
+</html>
